@@ -39,7 +39,7 @@ def openssl_cnf(filename, sans):
     :param sans: Array of SANs or string with single SAN
     :return: Nothing
     """
-    print(f'openssl_cnf: {type(sans)}')
+
     str_sans = ""
     if type(sans) is str:
         str_sans = sans
@@ -670,7 +670,8 @@ def create_server_certs_enc():
         dn = "/CN=server certificate encryption RSA"
     key_pair_rsa = create_csr(dn)
     server_keystore["key"] = key_pair_rsa["key"]
-    server_keystore["crt"] = sign_csr(key_pair_rsa["pub"], dn, [])
+    san = [f'URI.1 = {uuid.uuid4().urn}']
+    server_keystore["crt"] = sign_csr(key_pair_rsa["pub"], dn, san)
 
 
 def create_server_certs_sign():
@@ -686,7 +687,8 @@ def create_server_certs_sign():
     dn_sign = "/CN=server certificate sign RSA-PSS"
     key_pair_rsa_sign = create_csr_pss(dn_sign)
     server_keystore["key-sign"] = key_pair_rsa_sign["key"]
-    server_keystore["crt-sign"] = sign_csr(key_pair_rsa_sign["pub"], dn_sign, [])
+    san = [f'URI.1 = {uuid.uuid4().urn}']
+    server_keystore["crt-sign"] = sign_csr(key_pair_rsa_sign["pub"], dn_sign, san)
 
 
 def create_server_certs():

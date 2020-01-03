@@ -82,7 +82,6 @@ function createCMSSignedInternal(configToolbox, keyPair, dataIn) {
     const asn1pkey = asn1js.fromBER(convertPemToBinary(keyPair.privateKey));
     const pkey_info = new PrivateKeyInfo({schema: asn1pkey.result});
 
-    console.log("createCMSSignedInternal:\n%o", pkey_info);
     const signAlgorithm = {
         name: getAlgorithmByOID(pkey_info.privateKeyAlgorithm.algorithmId).name,
         extractable: false,
