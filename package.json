@@ -1,0 +1,14 @@
+{
+  "name": "babel-test",
+  "version": "1.0.0",
+  "description": "babel-test",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "install": "cd src && npm install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
