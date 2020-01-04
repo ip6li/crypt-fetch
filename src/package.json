@@ -1,7 +1,7 @@
 {
-  "name": "babel-test",
+  "name": "crypt-fetch",
   "version": "1.0.0",
-  "description": "babel-test-src",
+  "description": "crypt-fetch source for library.",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -12,8 +12,8 @@
     "postinstall": "npm run build"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Christian Felsing <support@felsing.net> (https://ip6.li/)",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "asn1js": "^2.0.26",
     "pkijs": "https://github.com/PeculiarVentures/PKI.js.git",

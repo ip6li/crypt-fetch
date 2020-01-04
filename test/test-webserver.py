@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
+import signal
 import re
 import subprocess
+import sys
 from json import JSONDecodeError
 from pathlib import Path
 import shutil
@@ -20,6 +22,7 @@ rsa_keysize = 2048
 pki_dir = "test-pki"
 ca_password = "geheim"
 server_keystore = {"ca": ""}
+pid_file = "./test-webserver.py.pid"
 
 config = {}
 
@@ -30,6 +33,17 @@ server_key_files = {
     "key-sign": "./test-cert-sign.key",
     "crt-sign": "./test-cert-sign.crt",
 }
+
+
+def sigterm_handler(_signo, _stack_frame):
+    os.unlink(pid_file)
+    sys.exit(0)
+
+
+def pidfile():
+    with open(pid_file, "w") as f:
+        f.write(str(os.getpid()))
+    f.close()
 
 
 def openssl_cnf(filename, sans):
@@ -1202,6 +1216,12 @@ def run(server_class=HTTPServer, handler_class=S, port=8000):
 if __name__ == '__main__':
     from sys import argv
 
+    if Path(pid_file).is_file():
+        print("Already running, please stop other process first")
+        sys.exit(1)
+
+    signal.signal(signal.SIGTERM, sigterm_handler)
+    pidfile()
     load_config()
     init_pki()
     create_server_certs()
