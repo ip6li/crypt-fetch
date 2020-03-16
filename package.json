@@ -16,8 +16,8 @@
     "email": "support@ip6.li"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/ip6li/crypt-fetch.git"
+    "type": "git",
+    "url": "https://github.com/ip6li/crypt-fetch.git"
   },
   "engines": {
     "node": ">=10"
