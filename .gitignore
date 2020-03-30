@@ -8,3 +8,6 @@ test/test-cert-sign.crt
 test/test-cert-sign.key
 test-pki
 test/bundle.js
+out
+test/test-webserver.py.pid
+
