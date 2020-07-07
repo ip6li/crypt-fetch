@@ -18,7 +18,8 @@
     "asn1js": "^2.0.26",
     "pkijs": "https://github.com/PeculiarVentures/PKI.js.git",
     "pvutils": "^1.0.17",
-    "minimist": "^1.2.5"
+    "minimist": "^1.2.5",
+    "kind-of": ">=6.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
