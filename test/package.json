@@ -14,12 +14,12 @@
     "test-webserver": "npm run build && ./test-webserver.py &"
   },
   "dependencies": {
-    "minimist": "^1.2.5"
+    "minimist": ">=1.2.5"
   },
   "devDependencies": {
-    "mocha": "^6.2.2",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "mocha": ">=8.1.1",
+    "webpack": ">=4.44.1",
+    "webpack-cli": ">=3.3.12"
   },
   "author": "Christian Felsing <support@felsing.net> (https://ip6.li/)",
   "license": "GPL-3.0-or-later"

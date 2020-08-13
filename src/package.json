@@ -15,18 +15,18 @@
   "author": "Christian Felsing <support@felsing.net> (https://ip6.li/)",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "asn1js": "^2.0.26",
+    "asn1js": ">=2.0.26",
     "pkijs": "https://github.com/PeculiarVentures/PKI.js.git",
-    "pvutils": "^1.0.17",
-    "minimist": "^1.2.5",
+    "pvutils": ">=1.0.17",
+    "minimist": ">=1.2.5",
     "kind-of": ">=6.0.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.4",
-    "babel-loader": "^8.0.6",
-    "babel-preset-env": "^1.7.0",
-    "webpack": "~4.39.1",
-    "webpack-cli": "^3.3.10"
+    "@babel/core": ">=7.11.1",
+    "babel-loader": ">=8.1.0",
+    "babel-preset-env": ">=1.7.0",
+    "webpack": ">=4.44.1",
+    "webpack-cli": ">=3.3.12"
   },
   "jshintConfig": {
     "esversion": 6
