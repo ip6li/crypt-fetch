@@ -1,5 +1,3 @@
-
-
 const signAlgorithm = {
     name: "RSASSA-PKCS1-V1_5",
     hash: {
@@ -11,16 +9,16 @@ const signAlgorithm = {
 };
 
 
-export function getParameters () {
+export function getParameters() {
     return signAlgorithm;
 }
 
-export function setParameters (newParameters) {
+export function setParameters(newParameters) {
     Object.assign(signAlgorithm, newParameters);
 }
 
 
-export function formatPEM (pemString) {
+export function formatPEM(pemString) {
     /// <summary>Format string in order to have each line with length equal to 63</summary>
     /// <param name="pemString" type="String">String to format</param>
 
@@ -91,15 +89,18 @@ export function importPublicKey(pemKey, alg = signAlgorithm) {
 
 export function importPrivateKey(pemKey, alg = signAlgorithm) {
     return new Promise(function (resolve) {
+        const binKey = convertPemToBinary(pemKey);
         const importer = crypto.subtle.importKey(
             "pkcs8",
-            convertPemToBinary(pemKey),
+            binKey,
             alg,
             true,
             ["sign"]
         );
         importer.then(function (key) {
             resolve(key);
+        }).catch((e) => {
+            console.log("# importPrivateKey failed: %o", e);
         });
     });
 }
