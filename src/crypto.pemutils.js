@@ -71,38 +71,49 @@ export function convertPemToBinary(pem) {
 }
 
 
-export function importPublicKey(pemKey, alg = signAlgorithm) {
+function importKey(pemKey, format, usages, alg) {
     return new Promise(function (resolve) {
+        const binKey = convertPemToBinary(pemKey);
         const importer = crypto.subtle.importKey(
-            "spki",
-            convertPemToBinary(pemKey),
+            format,
+            binKey,
             alg,
             true,
-            ["verify"]
+            usages
         );
         importer.then(function (key) {
             resolve(key);
+        }).catch((e) => {
+            console.log("importKey (%s) failed %o", format, e);
+            return e;
         });
     });
 }
 
 
-export function importPrivateKey(pemKey, alg = signAlgorithm) {
-    return new Promise(function (resolve) {
-        const binKey = convertPemToBinary(pemKey);
-        const importer = crypto.subtle.importKey(
-            "pkcs8",
-            binKey,
-            alg,
-            true,
-            ["sign"]
-        );
-        importer.then(function (key) {
-            resolve(key);
-        }).catch((e) => {
-            console.log("# importPrivateKey failed: %o", e);
-        });
+function importKey2(pemKey, format, usages, alg) {
+    const binKey = convertPemToBinary(pemKey);
+    const importer = crypto.subtle.importKey(
+        format,
+        binKey,
+        alg,
+        true,
+        usages
+    );
+
+    return importer.then(function (key) {
+        return key;
     });
+}
+
+
+export function importPublicKey(pemKey, alg = signAlgorithm) {
+    return importKey2(pemKey, "spki", ["verify"], alg);
+}
+
+
+export function importPrivateKey(pemKey, alg = signAlgorithm) {
+    return importKey2(pemKey, "pkcs8", ["sign"], alg);
 }
 
 
