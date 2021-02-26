@@ -185,8 +185,8 @@ P4HuC5nHEvot/3TPc348ty/SmQ==
         });
     });
 
-    describe('genKey: Creates a  new key pair and a PKCS#10 certificate signing request', () => {
-        it('should return a Promise resolve and you should see a key pair and a PKCS#10 CSR', async () => {
+    describe('genKey: Creates a new key pair', () => {
+        it('should return a Promise resolve and you should see a key pair', async () => {
             let sequence = Promise.resolve();
 
             const configToolbox = x509.getConfig();

@@ -2,10 +2,7 @@ const signAlgorithm = {
     name: "RSASSA-PKCS1-V1_5",
     hash: {
         name: "SHA-256"
-    },
-    //modulusLength: 2048,
-    extractable: false,
-    //publicExponent: new Uint8Array([1, 0, 1])
+    }
 };
 
 
@@ -68,26 +65,6 @@ export function convertPemToBinary(pem) {
         }
     }
     return base64StringToArrayBuffer(encoded);
-}
-
-
-function importKey(pemKey, format, usages, alg) {
-    return new Promise(function (resolve) {
-        const binKey = convertPemToBinary(pemKey);
-        const importer = crypto.subtle.importKey(
-            format,
-            binKey,
-            alg,
-            true,
-            usages
-        );
-        importer.then(function (key) {
-            resolve(key);
-        }).catch((e) => {
-            console.log("importKey (%s) failed %o", format, e);
-            return e;
-        });
-    });
 }
 
 

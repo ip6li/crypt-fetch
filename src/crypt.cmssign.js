@@ -3,7 +3,14 @@ import {
     cmsBegin,
     cmsEnd,
     contentTypeDataID,
-    contentTypesignedDataID, dgtIDsha1, messageDigestID, pkcs7ID, pkcs9ID, sha1withRSAid, signingTimeID
+    contentTypesignedDataID,
+    dgtIDsha1,
+    messageDigestID,
+    pkcs7ID,
+    pkcs9ID,
+    privateKeyDelimiter,
+    sha1withRSAid,
+    signingTimeID
 } from "./crypt.constants";
 import Certificate from "pkijs/src/Certificate";
 import SignedData from "pkijs/src/SignedData";
@@ -12,10 +19,10 @@ import SignerInfo from "pkijs/src/SignerInfo";
 import IssuerAndSerialNumber from "pkijs/src/IssuerAndSerialNumber";
 import ContentInfo from "pkijs/src/ContentInfo";
 import {convertPemToBinary, formatPEM, importPrivateKey} from "./crypto.pemutils";
-import {arrayBufferToString, toBase64} from "pvutils";
+import {arrayBufferToString, stringToArrayBuffer, toBase64} from "pvutils";
 import Attribute from "pkijs/src/Attribute";
 import SignedAndUnsignedAttributes from "pkijs/src/SignedAndUnsignedAttributes";
-import {getAlgorithmByOID, getCrypto, getOIDByAlgorithm, PrivateKeyInfo} from "pkijs";
+import {getAlgorithmByOID, getCrypto, getOIDByAlgorithm, PrivateKeyInfo, RSAPrivateKey} from "pkijs";
 import AlgorithmIdentifier from "pkijs/src/AlgorithmIdentifier";
 
 
@@ -88,9 +95,27 @@ function createCMSSignedInternal(configToolbox, keyPair, dataIn) {
         hash: "SHA-256"
     };
 
+    // PKI.js and crypto.subtle seems to have different naming conventions...
+    let signAlgorithm_name = signAlgorithm.name;
+    switch (signAlgorithm.name) {
+        case "RSAES-PKCS1-v1_5": signAlgorithm_name = "RSASSA-PKCS1-V1_5"; break;
+    }
+    const signAlgorithmSubtle = {
+        name: signAlgorithm_name,
+        hash: {
+            name: signAlgorithm.hash
+        }
+    };
     let pkey = {};
+    const binKey = convertPemToBinary(keyPair.privateKey);
     sequence = sequence.then(() => {
-        return importPrivateKey(keyPair.privateKey, signAlgorithm).then((key) => {
+        return crypto.subtle.importKey(
+            "pkcs8",
+            binKey,
+            signAlgorithmSubtle,
+            true,
+            ["sign"]
+        ).then((key) => {
             pkey = key;
         });
     });
