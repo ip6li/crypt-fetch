@@ -12,8 +12,8 @@
       "length": 256
     },
     "remotekeystore": {},
-    "authURL": "http://127.0.0.1:8000/login.json",
-    "messageURL": "http://127.0.0.1:8000/message.json",
-    "renewURL": "http://127.0.0.1:8000/renew.json"
+    "authURL": "http://127.0.0.1:8000/login",
+    "messageURL": "http://127.0.0.1:8000/message",
+    "renewURL": "http://127.0.0.1:8000/renew"
   }
 }

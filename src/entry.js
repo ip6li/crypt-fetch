@@ -31,8 +31,21 @@ class X509 {
             body: JSON.stringify({}) // body data type must match "Content-Type" header
         };
 
+        const defaultGetRequest = {
+            method: 'GET', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: 'omit', // include, *same-origin, omit
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow', // manual, *follow, error
+            referrer: 'no-referrer' // no-referrer, *client
+        };
+
         this.config = this.configToolbox.getConfig();
         this.config.defaultRequest = defaultRequest;
+        this.config.defaultGetRequest = defaultGetRequest;
         this.configToolbox.setConfig(this.config);
     }
 
@@ -68,7 +81,7 @@ class X509 {
         return sign_and_encrypt (this.configToolbox, plainText);
     }
 
-    loadConfig(configURL, request=this.config.defaultRequest) {
+    loadConfig(configURL, request=this.config.defaultGetRequest) {
         return fetch(configURL, request).then((response)=>{
             return response.json().then((data)=>{
                 this.setConfig(data.config);

@@ -153,7 +153,7 @@ P4HuC5nHEvot/3TPc348ty/SmQ==
     }
 
     before("Loading Config", async () => {
-        const configURL = "http://127.0.0.1:8000/config.json";
+        const configURL = "http://127.0.0.1:8000/config";
         x509.loadConfig(configURL).then(() => {
             console.log("Config loaded");
         });

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import signal
 import re
 import subprocess
 import sys
@@ -22,7 +21,7 @@ rsa_keysize = 2048
 pki_dir = "test-pki"
 ca_password = "geheim"
 server_keystore = {"ca": ""}
-pid_file = "./test-webserver.py.pid"
+encoding = "utf-8"
 
 config = {}
 
@@ -33,17 +32,6 @@ server_key_files = {
     "key-sign": "./test-cert-sign.key",
     "crt-sign": "./test-cert-sign.crt",
 }
-
-
-def sigterm_handler(_signo, _stack_frame):
-    os.unlink(pid_file)
-    sys.exit(0)
-
-
-def pidfile():
-    with open(pid_file, "w") as f:
-        f.write(str(os.getpid()))
-    f.close()
 
 
 def openssl_cnf(filename, sans):
@@ -258,7 +246,7 @@ basicConstraints=CA:FALSE
 # keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 
 # This will be displayed in Netscape's comment listbox.
-nsComment			= "OpenSSL Generated Certificate"
+nsComment			= "OpenSSL/Python Generated Certificate"
 
 # PKIX recommendations harmless if included in all certificates.
 subjectKeyIdentifier=hash
@@ -285,6 +273,8 @@ subjectAltName = @alt_names
 
 # This is required for TSA certificates.
 # extendedKeyUsage = critical,timeStamping
+#extendedKeyUsage = serverAuth, clientAuth, emailProtection
+extendedKeyUsage = serverAuth, emailProtection
 
 [ v3_req ]
 
@@ -364,7 +354,7 @@ basicConstraints=CA:FALSE
 # keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 
 # This will be displayed in Netscape's comment listbox.
-nsComment			= "OpenSSL Generated Certificate"
+nsComment			= "OpenSSL/Python Generated Proxy Certificate"
 
 # PKIX recommendations harmless if included in all certificates.
 subjectKeyIdentifier=hash
@@ -1028,7 +1018,7 @@ def renew(cms):
         else:
             logging.error("Validation of signature failed")
     except (OSError, JSONDecodeError) as err:
-        logging.error("Invalid Access renew", err)
+        logging.error("Invalid Access renew: %o", err)
 
     return json.dumps({"err": "Invalid request"})
 
@@ -1111,6 +1101,14 @@ def do_message(cms):
 
 
 class S(BaseHTTPRequestHandler):
+    def end_headers (self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Credentials', 'true')
+        self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.send_header('Access-Control-Max-Age', '3600')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Accept, X-Requested-With, remember-me')
+        BaseHTTPRequestHandler.end_headers(self)
+
     """
     A small demo web server which provides all functions needed by client
     """
@@ -1139,7 +1137,6 @@ class S(BaseHTTPRequestHandler):
                     content_type = kind.mime
 
             self.send_header('Content-type', content_type)
-            self.send_header('Access-Control-Allow-Origin', 'null')  # DO NOT USE IN PRODUCTION
             self.send_header('Access-Control-Allow-Headers', 'Content-type')
             self.end_headers()
         except OSError as err:
@@ -1154,50 +1151,63 @@ class S(BaseHTTPRequestHandler):
         logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
 
         filename = str(self.path)[1:]
-        if filename is None or filename == "":
-            filename = "genkey.html"
-        try:
-            with open(filename, "rb") as f:
-                read_data = f.read()
-            f.close()
-            self._set_response()
-            response = BytesIO()
-            response.write(read_data)
-            self.wfile.write(response.getvalue())
-        except OSError as err:
-            logging.error(f'File not found: {filename} {err}')
-            self._set_response()
-            response = BytesIO()
-            response.write(bytes(f'File not found: {filename}', "utf8"))
-            self.wfile.write(response.getvalue())
+        if filename == "config.json":
+            self.error_message_format = '{ "err": "Access denied" }'
+            self.send_error(403, message=None, explain='')
+        elif filename == "config":
+            logging.error(f'Config called')
+            self.send_response(200)
+            self.end_headers()
+            read_data = get_config()
+            self.wfile.write(bytes(read_data, encoding))
+        elif filename == "terminate":
+            logging.error(f'Terminate called')
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(bytes(f'Terminating', encoding))
+            sys.exit(0)
+        else:
+            try:
+                if filename is None or filename == "":
+                    filename = "genkey.html"
+                with open(filename, "rb") as f:
+                    read_data = f.read()
+                f.close()
+                self._set_response()
+                response = BytesIO()
+                response.write(read_data)
+                self.wfile.write(response.getvalue())
+            except OSError as err:
+                logging.error(f'File not found: {filename} {err}')
+                self.error_message_format = '{ "err": "File not found" }'
+                self.send_error(404, message=None, explain='')
 
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
         post_data = self.rfile.read(content_length)  # <--- Gets the data itself
         logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n",
-                     str(self.path), str(self.headers), post_data.decode('utf-8'))
+                     str(self.path), str(self.headers), post_data.decode(encoding))
 
         filename = str(self.path)[1:]
         logging.info("filename: %s", filename)
 
-        if filename == "config.json":
-            read_data = get_config()
-        elif filename == "login.json":
+        if filename == "login":
             logging.info("login called")
-            read_data = login(post_data.decode('utf-8'))
-        elif filename == "message.json":
+            read_data = login(post_data.decode(encoding))
+        elif filename == "message":
             logging.info("message called")
-            read_data = do_message(post_data.decode('utf-8'))
-        elif filename == "renew.json":
+            read_data = do_message(post_data.decode(encoding))
+        elif filename == "renew":
             logging.info("renew called")
-            read_data = renew(post_data.decode('utf-8'))
+            read_data = renew(post_data.decode(encoding))
         else:
-            read_data = json.dumps({"error": "Invalid Request"})
+            self.error_message_format = '{ "err": "Invalid request" }'
+            self.send_error(404, message=None, explain='')
+            return
 
-        self._set_response()
-        response = BytesIO()
-        response.write(bytes(read_data, "utf8"))
-        self.wfile.write(response.getvalue())
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(bytes(read_data, encoding))
 
 
 def run(server_class=HTTPServer, handler_class=S, port=8000):
@@ -1216,12 +1226,6 @@ def run(server_class=HTTPServer, handler_class=S, port=8000):
 if __name__ == '__main__':
     from sys import argv
 
-    if Path(pid_file).is_file():
-        print("Already running, please stop other process first")
-        sys.exit(1)
-
-    signal.signal(signal.SIGTERM, sigterm_handler)
-    pidfile()
     load_config()
     init_pki()
     create_server_certs()

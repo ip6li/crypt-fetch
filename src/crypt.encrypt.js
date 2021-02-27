@@ -9,7 +9,6 @@ import {formatPEM} from "./crypto.pemutils";
 
 const envelopedEncryptInternal = function (configToolbox, keyPair, dataIn) {
     const config = configToolbox.getConfig();
-
     const certificateBuffer = stringToArrayBuffer(fromBase64(keyPair.certificate.replace(certificateDelimiter, "")));
     const certSimpl = new Certificate({schema: asn1js.fromBER(certificateBuffer).result});
 

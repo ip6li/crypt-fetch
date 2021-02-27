@@ -50,3 +50,7 @@ Do not enable them, because they are for future developments.
 
     env LDFLAGS="-L$(brew --prefix openssl)/lib" CFLAGS="-I$(brew --prefix openssl)/include" pip3 install pyopenssl
 
+# Useful scripts
+
+    cat <excerpt from firefox debug console> | jq .remotekeystore.server | sed 's/"//g' | sed "s/\\\\n/\\n/g" | openssl x509 -noout -text
+
